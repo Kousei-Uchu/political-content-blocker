@@ -2,16 +2,18 @@
   "manifest_version": 2,
   "name": "AI Political Content Blocker",
   "version": "1.0",
-  "description": "Blocks political content using AI models. https://github.com/Kousei-Uchu/political-content-blocker",
-  "permissions": ["<all_urls>"],
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["tf.min.js", "toxicity.min.js", "nsfwjs.min.js", "content.js"],
-      "run_at": "document_end"
-    }
-  ],
+  "description": "Blocks political content (text & images) using AI models: TensorFlow.js, Toxicity, and NSFW.js.",
+  "permissions": ["activeTab", "<all_urls>"],
+  "background": {
+    "scripts": []
+  },
   "browser_action": {
-    "default_popup": "popup.html"
-  }
+    "default_popup": "popup.html",
+    "default_title": "AI Political Blocker"
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }]
 }

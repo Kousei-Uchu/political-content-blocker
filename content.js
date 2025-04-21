@@ -1,11 +1,13 @@
-console.log("🧠 AI Political Blocker AI script starting...");
+console.log("🧠 AI Political Blocker script starting...");
 
-// Load TensorFlow.js and models
+// Load TensorFlow.js dynamically
 const scriptTF = document.createElement('script');
 scriptTF.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.0.0/dist/tf.min.js';
 document.head.appendChild(scriptTF);
 
 scriptTF.onload = () => {
+  console.log("✅ TensorFlow.js loaded!");
+
   // Load toxicity model
   tf.loadGraphModel('https://cdn.jsdelivr.net/npm/@tensorflow-models/toxicity').then(model => {
     console.log("🔍 Toxicity model loaded!");

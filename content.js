@@ -1,18 +1,19 @@
 console.log("🧠 AI Political Blocker script starting...");
 
-// Load TensorFlow.js and Toxicity model
+// Load TensorFlow.js
 const scriptTF = document.createElement('script');
 scriptTF.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs';
 scriptTF.onload = () => {
   console.log("✅ TensorFlow.js loaded!");
 
+  // Load pre-bundled toxicity model (UMD version)
   const scriptToxic = document.createElement('script');
-  scriptToxic.src = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/toxicity';
+  scriptToxic.src = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/toxicity@1.2.2/dist/toxicity.min.js';
   scriptToxic.onload = () => {
     console.log("✅ Toxicity model script loaded!");
 
     const threshold = 0.8;
-    toxicity.load(threshold).then(model => {
+    window.toxicity.load(threshold).then(model => {
       console.log("🔍 Toxicity model loaded!");
 
       function checkTextForToxicity(text) {
@@ -32,7 +33,7 @@ scriptTF.onload = () => {
         }
       }
 
-      // Initial scan
+      // Scan all text nodes
       const blocks = Array.from(document.querySelectorAll("p, span, div, h1, h2, h3"));
       blocks.forEach(el => {
         if (el.innerText && !el.dataset.blocked) {
@@ -58,7 +59,6 @@ scriptTF.onload = () => {
         });
       });
       observer.observe(document.body, { childList: true, subtree: true });
-
     });
   };
   document.head.appendChild(scriptToxic);

@@ -1,75 +1,39 @@
-function injectScript(fileUrl) {
-  const script = document.createElement('script');
-  script.src = fileUrl;
-  script.type = 'text/javascript';
-  script.async = false;
-  script.onload = () => console.log(`✅ Injected ${fileUrl}`);
-  document.documentElement.appendChild(script);
+function analyzeText(text, callback) {
+  chrome.runtime.sendMessage({ type: "analyzeText", text }, response => {
+    if (response && response.toxic) {
+      callback(true);
+    } else {
+      callback(false);
+    }
+  });
 }
 
-// Inject libraries into the page context (not content script context)
-injectScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs');
-injectScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/toxicity@1.2.2/dist/toxicity.min.js');
-
-// Inject our detection logic once libraries are loaded
-const logicScript = document.createElement('script');
-logicScript.textContent = `
-  console.log("🚀 AI Political Blocker starting...");
-
-  function waitForToxicityModel(callback) {
-    if (typeof toxicity === 'undefined' || typeof tf === 'undefined') {
-      console.log("⏳ Waiting for toxicity model...");
-      return setTimeout(() => waitForToxicityModel(callback), 500);
-    }
-    callback();
+function blockElement(el) {
+  if (el && el.style) {
+    el.style.display = "none";
+    el.setAttribute("data-blocked", "true");
+    console.log("🔕 Blocked toxic content:", el.innerText?.slice(0, 100) || "[element]");
   }
+}
 
-  waitForToxicityModel(() => {
-    const threshold = 0.8;
-    toxicity.load(threshold).then(model => {
-      console.log("🔍 Toxicity model loaded!");
-
-      function checkTextForToxicity(text) {
-        return model.classify([text]).then(preds => {
-          return preds.some(p =>
-            p.label === "toxicity" &&
-            p.results[0].probabilities[1] > threshold
-          );
-        });
+// Block text content
+document.querySelectorAll("p, span, div, h1, h2, h3").forEach(el => {
+  const text = el.innerText;
+  if (text && text.length > 20) { // Avoid tiny snippets
+    analyzeText(text, isToxic => {
+      if (isToxic) {
+        blockElement(el);
       }
-
-      function blockElement(el) {
-        if (el && el.style && !el.dataset.blocked) {
-          el.style.display = "none";
-          el.dataset.blocked = "true";
-          console.log("🔒 Blocked:", el.innerText?.slice(0, 80));
-        }
-      }
-
-      const blocks = Array.from(document.querySelectorAll("p, span, div, h1, h2, h3"));
-      blocks.forEach(el => {
-        if (el.innerText && !el.dataset.blocked) {
-          checkTextForToxicity(el.innerText).then(block => {
-            if (block) blockElement(el.closest("article") || el.closest("div") || el);
-          });
-        }
-      });
-
-      const observer = new MutationObserver(muts => {
-        muts.forEach(m => {
-          m.addedNodes.forEach(n => {
-            if (n.nodeType === Node.ELEMENT_NODE && n.innerText) {
-              checkTextForToxicity(n.innerText).then(block => {
-                if (block) blockElement(n.closest("article") || n.closest("div") || n);
-              });
-            }
-          });
-        });
-      });
-
-      observer.observe(document.body, { childList: true, subtree: true });
     });
-  });
-`;
+  }
+});
 
-(document.head || document.documentElement).appendChild(logicScript);
+// Block images based on toxic content
+document.querySelectorAll("img").forEach(img => {
+  if (img.src) {
+    // Analyze image for political content (can be added in background.js if necessary)
+    // Placeholder function for now
+    img.style.display = "none"; // Hide toxic image (just an example)
+    console.log("🔕 Blocked toxic image:", img.src);
+  }
+});

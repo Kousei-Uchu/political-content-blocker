@@ -2,12 +2,8 @@
   "manifest_version": 2,
   "name": "AI Political Content Blocker",
   "version": "1.0",
-  "description": "Blocks political content (text & images) using AI models: TensorFlow.js, Toxicity, and NSFW.js.",
+  "description": "Blocks political content (text only for now) using AI models.",
   "permissions": ["activeTab", "<all_urls>"],
-  "background": {
-    "scripts": ["background.js"],
-    "persistent": false
-  },
   "browser_action": {
     "default_popup": "popup.html",
     "default_title": "AI Political Blocker"

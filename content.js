@@ -1,18 +1,16 @@
 console.log("🧠 AI Political Blocker script starting...");
 
-// Load TensorFlow.js dynamically
+// Dynamically load TensorFlow.js into the page
 const scriptTF = document.createElement('script');
 scriptTF.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.0.0/dist/tf.min.js';
-document.head.appendChild(scriptTF);
-
-scriptTF.onload = () => {
+scriptTF.onload = function () {
   console.log("✅ TensorFlow.js loaded!");
-
-  // Load toxicity model
+  
+  // After TensorFlow.js is loaded, we can proceed to load the toxicity model
   tf.loadGraphModel('https://cdn.jsdelivr.net/npm/@tensorflow-models/toxicity').then(model => {
     console.log("🔍 Toxicity model loaded!");
 
-    // Function to detect political content in text
+    // Function to check if the text is political
     function checkTextForPoliticalContent(text) {
       return model.classify([text]).then(predictions => {
         const toxicPredictions = predictions.filter(prediction => prediction.className === 'toxicity' && prediction.probabilities[1] > 0.7);
@@ -20,7 +18,7 @@ scriptTF.onload = () => {
       });
     }
 
-    // Function to block elements
+    // Function to block the element (hide it)
     function blockElement(el) {
       if (el && el.style) {
         el.style.display = "none";
@@ -56,16 +54,14 @@ scriptTF.onload = () => {
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // Image analysis using NSFW.js
+    // Load NSFW.js script
     const scriptNSFW = document.createElement('script');
     scriptNSFW.src = 'https://cdn.jsdelivr.net/npm/nsfwjs@2.0.0/dist/nsfwjs.min.js';
-    document.head.appendChild(scriptNSFW);
-
     scriptNSFW.onload = () => {
       nsfwjs.load().then(model => {
         console.log("🔍 NSFW.js model loaded!");
 
-        // Function to analyze image for political content
+        // Function to analyze images for political content
         function analyzeImage(img) {
           model.classify(img).then(predictions => {
             const politicalImage = predictions.some(pred => pred.className.toLowerCase().includes("political") && pred.probability > 0.7);
@@ -83,5 +79,8 @@ scriptTF.onload = () => {
         });
       });
     };
+    document.head.appendChild(scriptNSFW);
   });
 };
+
+document.head.appendChild(scriptTF); // Add the script to the page after the onload function
